@@ -1,5 +1,27 @@
 <template>
   <q-page class="bg-red-2 column">
+
+    <div class="row q-pa-sm bg-primary">
+      <q-input 
+        v-model="newTask" 
+        @keyup.enter="addTask"
+        class="col"
+        square
+        filled 
+        bg-color="white" 
+        placeholder="Add task" 
+        dense>
+        <template v-slot:append>
+          <q-btn 
+            @click="addTask"
+            round 
+            dense 
+            flat 
+            icon="add" />
+        </template>
+      </q-input>
+    </div>
+
     <q-list separator bordered>
       <q-item
         @click="task.done = !task.done" 
@@ -20,6 +42,16 @@
         </q-item-section>
       </q-item>
 
+      <div v-if="!tasks.length" class="no-tasks absolute-center">
+        <q-icon
+          name="check"
+          size="100px"
+          color="primary" />
+        <div class="text-h5 text-primary text-center">
+          No tasks
+        </div>
+      </div>
+
     </q-list>
   </q-page>
 </template>
@@ -29,6 +61,7 @@
 export default {
   data() {
     return {
+      newTask: '',
       tasks: [
         {
           title: "hello",
@@ -47,7 +80,22 @@ export default {
   },
   methods: {
     deleteTask(index) {
-      this.tasks.splice(index, 1)
+      this.$q.dialog({
+        title: 'Confirm',
+        message: 'Really delete?',
+        cancel: true,
+        persistent: true
+      }).onOk(() => {
+        this.tasks.splice(index, 1)
+        this.$q.notify('Task deleted')
+      })
+    },
+    addTask() {
+      this.tasks.push({
+        title: this.newTask,
+        done: false
+      })
+      this.newTask = ''
     }
   }
 }
@@ -60,5 +108,8 @@ export default {
     text-decoration: line-through;
     color: red;
   }
+}
+.no-tasks {
+  opacity: 0.5;
 }
 </style>
